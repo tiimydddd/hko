@@ -579,7 +579,7 @@ export function App() {
             <div className="space-y-6">
               <div className="flex items-center gap-3 px-2">
                 <img
-                  src="/img_app_icon_foreground.jpg"
+                  src={`${import.meta.env.BASE_URL}img_app_icon_foreground.jpg`}
                   alt="STCA Weather"
                   className="w-10 h-10 rounded-xl object-cover shadow"
                 />
@@ -766,7 +766,7 @@ export function App() {
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <img
-                  src="/img_app_icon_foreground.jpg"
+                  src={`${import.meta.env.BASE_URL}img_app_icon_foreground.jpg`}
                   alt="STCA Weather"
                   className="w-7 h-7 rounded-lg object-cover"
                 />

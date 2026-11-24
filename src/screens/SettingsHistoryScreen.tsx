@@ -478,7 +478,7 @@ export function SettingsHistoryScreen({
         ) : (
           <div className="space-y-2.5">
             <div className="relative h-28 rounded-xl overflow-hidden">
-              <img src="/img_auth_hero.jpg" alt="STCA 雲端同步" className="w-full h-full object-cover" />
+              <img src={`${import.meta.env.BASE_URL}img_auth_hero.jpg`} alt="STCA 雲端同步" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-transparent flex items-end p-3">
                 <p className="text-xs text-slate-100 leading-relaxed">
                   目前為免登入模式（設定及紀錄均已於本機保存，無須登入即可完整使用）。如需換機同步雲端備份，才須選用登入：

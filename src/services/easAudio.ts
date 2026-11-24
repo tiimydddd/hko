@@ -52,7 +52,7 @@ class EasAudioEngineImpl {
 
     if (toneType === 'HKO_MP3') {
       try {
-        const audio = new Audio('/eas_hko_warning.mp3');
+        const audio = new Audio(`${import.meta.env.BASE_URL}eas_hko_warning.mp3`);
         audio.volume = safeVol;
         this.audioEl = audio;
         this.setPlaying(true);

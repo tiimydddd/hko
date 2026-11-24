@@ -424,7 +424,7 @@ export function postWeatherAlertNotification(
   try {
     new Notification(title, {
       body,
-      icon: '/img_app_icon_foreground.jpg',
+      icon: `${import.meta.env.BASE_URL}img_app_icon_foreground.jpg`,
       silent: inQuiet,
       tag: 'stca-weather-eas',
     });

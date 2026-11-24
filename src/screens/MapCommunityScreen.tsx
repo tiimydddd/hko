@@ -146,7 +146,7 @@ export function MapCommunityScreen({
       {/* 2. Shelter Illustration Banner */}
       <div className="relative w-full h-36 rounded-2xl overflow-hidden shadow">
         <img
-          src="/img_shelter_banner.jpg"
+          src={`${import.meta.env.BASE_URL}img_shelter_banner.jpg`}
           alt="香港臨時庇護中心"
           className="w-full h-full object-cover"
         />
