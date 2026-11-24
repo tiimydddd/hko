@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "UserPreferences": {
+      "title": "UserPreferences",
+      "description": "Personalized STCA Weather settings, EAS quiet hours, temperature threshold, and display preferences for cloud backup.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Authenticated Firebase UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "quietHoursEnabled": { "type": "boolean", "description": "Whether EAS quiet hours are enabled" },
+        "quietStartHour": { "type": "integer", "description": "Quiet hours start hour (0-23)" },
+        "quietStartMinute": { "type": "integer", "description": "Quiet hours start minute (0-59)" },
+        "quietEndHour": { "type": "integer", "description": "Quiet hours end hour (0-23)" },
+        "quietEndMinute": { "type": "integer", "description": "Quiet hours end minute (0-59)" },
+        "tempAlertThreshold": { "type": "number", "description": "Low temperature EAS trigger threshold in Celsius" },
+        "easAutoPlay": { "type": "boolean", "description": "Auto-play EAS audio siren when active outside quiet hours" },
+        "easToneType": { "type": "string", "enum": ["HKO_MP3", "SAME_DUAL", "TYPHOON_SIREN", "COLD_CHIME"] },
+        "autoPushEnabled": { "type": "boolean", "description": "Background auto push alerts enabled" },
+        "darkModePref": { "type": "string", "enum": ["SYSTEM", "LIGHT", "DARK"] },
+        "broadcastLang": { "type": "string", "enum": ["TC", "SC", "EN", "ID", "TL", "NE", "UR", "HI"] },
+        "selectedDistrict": { "type": "string", "description": "Preferred Hong Kong district" },
+        "emergencySmsNumber": { "type": "string", "description": "Emergency weather SMS relay or contact number" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "quietHoursEnabled",
+        "quietStartHour",
+        "quietStartMinute",
+        "quietEndHour",
+        "quietEndMinute",
+        "tempAlertThreshold",
+        "easAutoPlay",
+        "easToneType",
+        "autoPushEnabled",
+        "darkModePref",
+        "broadcastLang",
+        "selectedDistrict",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WeatherHistoryRecord": {
+      "title": "WeatherHistoryRecord",
+      "description": "Cloud-synced historical weather query or exported report snapshot owned by a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase UID" },
+        "stationName": { "type": "string", "description": "HKO station name" },
+        "district": { "type": "string", "description": "Hong Kong district" },
+        "recordDate": { "type": "string", "description": "Date string YYYY-MM-DD" },
+        "tempCelsius": { "type": "number", "description": "Observed or mean temperature in Celsius" },
+        "maxTempCelsius": { "type": "number", "description": "Daily max temperature in Celsius" },
+        "minTempCelsius": { "type": "number", "description": "Daily min temperature in Celsius" },
+        "humidityPercent": { "type": "integer", "description": "Relative humidity percentage" },
+        "rainfallMm": { "type": "number", "description": "Rainfall in millimeters" },
+        "uvIndex": { "type": "number", "description": "UV index value" },
+        "aqhiLevel": { "type": "integer", "description": "AQHI level 1-11" },
+        "activeWarnings": { "type": "string", "description": "Comma-separated active warning codes" },
+        "summaryNote": { "type": "string", "description": "Optional summary note" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
+      },
+      "required": [
+        "userId",
+        "stationName",
+        "district",
+        "recordDate",
+        "tempCelsius",
+        "maxTempCelsius",
+        "minTempCelsius",
+        "humidityPercent",
+        "rainfallMm",
+        "uvIndex",
+        "aqhiLevel",
+        "activeWarnings",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CommunityReport": {
+      "title": "CommunityReport",
+      "description": "Community-submitted hazard, flooding, or severe weather impact report.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Author Firebase UID" },
+        "authorAlias": { "type": "string", "description": "Public author nickname without PII" },
+        "district": { "type": "string", "description": "Hong Kong district" },
+        "hazardType": { "type": "string", "enum": ["FLOODING", "FALLEN_TREE", "LANDSLIP", "STRONG_GUST", "ROAD_CLOSURE", "ICY_FROST"] },
+        "severity": { "type": "string", "enum": ["LOW", "MODERATE", "SEVERE", "CRITICAL"] },
+        "waterDepthCm": { "type": "integer", "description": "Reported flooding depth in centimeters" },
+        "description": { "type": "string", "description": "Short hazard description" },
+        "latitude": { "type": "number", "description": "Latitude within Hong Kong bounds" },
+        "longitude": { "type": "number", "description": "Longitude within Hong Kong bounds" },
+        "visibility": { "type": "string", "enum": ["PUBLIC"] },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update" }
+      },
+      "required": [
+        "userId",
+        "authorAlias",
+        "district",
+        "hazardType",
+        "severity",
+        "waterDepthCm",
+        "description",
+        "latitude",
+        "longitude",
+        "visibility",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPreferences" },
+      "description": "Per-user cloud-backed STCA Weather preferences and EAS settings"
+    },
+    "/users/{userId}/weather_history/{recordId}": {
+      "schema": { "$ref": "#/entities/WeatherHistoryRecord" },
+      "description": "Per-user cloud-backed historical weather snapshots and exported reports"
+    },
+    "/community_reports/{reportId}": {
+      "schema": { "$ref": "#/entities/CommunityReport" },
+      "description": "Shared community disaster and flooding reports across Hong Kong districts"
+    }
+  }
+}

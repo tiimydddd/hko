@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserPreferences(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.quietHoursEnabled is bool &&
+             data.quietStartHour is int && data.quietStartHour >= 0 && data.quietStartHour <= 23 &&
+             data.quietStartMinute is int && data.quietStartMinute >= 0 && data.quietStartMinute <= 59 &&
+             data.quietEndHour is int && data.quietEndHour >= 0 && data.quietEndHour <= 23 &&
+             data.quietEndMinute is int && data.quietEndMinute >= 0 && data.quietEndMinute <= 59 &&
+             data.tempAlertThreshold is number && data.tempAlertThreshold >= -5.0 && data.tempAlertThreshold <= 45.0 &&
+             data.easAutoPlay is bool &&
+             data.easToneType in ['HKO_MP3', 'SAME_DUAL', 'TYPHOON_SIREN', 'COLD_CHIME'] &&
+             data.autoPushEnabled is bool &&
+             data.darkModePref in ['SYSTEM', 'LIGHT', 'DARK'] &&
+             data.broadcastLang in ['TC', 'SC', 'EN', 'ID', 'TL', 'NE', 'UR', 'HI'] &&
+             data.selectedDistrict is string && data.selectedDistrict.size() >= 1 && data.selectedDistrict.size() <= 60 &&
+             (!('emergencySmsNumber' in data) || (data.emergencySmsNumber is string && data.emergencySmsNumber.size() <= 32)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidWeatherHistoryRecord(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.stationName is string && data.stationName.size() >= 1 && data.stationName.size() <= 80 &&
+             data.district is string && data.district.size() >= 1 && data.district.size() <= 80 &&
+             data.recordDate is string && data.recordDate.size() >= 1 && data.recordDate.size() <= 32 &&
+             data.tempCelsius is number && data.tempCelsius >= -15.0 && data.tempCelsius <= 55.0 &&
+             data.maxTempCelsius is number && data.maxTempCelsius >= -15.0 && data.maxTempCelsius <= 55.0 &&
+             data.minTempCelsius is number && data.minTempCelsius >= -15.0 && data.minTempCelsius <= 55.0 &&
+             data.humidityPercent is int && data.humidityPercent >= 0 && data.humidityPercent <= 100 &&
+             data.rainfallMm is number && data.rainfallMm >= 0.0 && data.rainfallMm <= 2000.0 &&
+             data.uvIndex is number && data.uvIndex >= 0.0 && data.uvIndex <= 25.0 &&
+             data.aqhiLevel is int && data.aqhiLevel >= 0 && data.aqhiLevel <= 11 &&
+             data.activeWarnings is string && data.activeWarnings.size() <= 300 &&
+             (!('summaryNote' in data) || (data.summaryNote is string && data.summaryNote.size() <= 400)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidCommunityReport(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.authorAlias is string && data.authorAlias.size() >= 1 && data.authorAlias.size() <= 60 &&
+             data.district is string && data.district.size() >= 1 && data.district.size() <= 60 &&
+             data.hazardType in ['FLOODING', 'FALLEN_TREE', 'LANDSLIP', 'STRONG_GUST', 'ROAD_CLOSURE', 'ICY_FROST'] &&
+             data.severity in ['LOW', 'MODERATE', 'SEVERE', 'CRITICAL'] &&
+             data.waterDepthCm is int && data.waterDepthCm >= 0 && data.waterDepthCm <= 500 &&
+             data.description is string && data.description.size() >= 1 && data.description.size() <= 400 &&
+             data.latitude is number && data.latitude >= 22.0 && data.latitude <= 22.7 &&
+             data.longitude is number && data.longitude >= 113.7 && data.longitude <= 114.6 &&
+             data.visibility == 'PUBLIC' &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'displayName', 'quietHoursEnabled',
+                         'quietStartHour', 'quietStartMinute', 'quietEndHour', 'quietEndMinute',
+                         'tempAlertThreshold', 'easAutoPlay', 'easToneType',
+                         'autoPushEnabled', 'darkModePref', 'broadcastLang', 'selectedDistrict',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'displayName', 'quietHoursEnabled',
+                         'quietStartHour', 'quietStartMinute', 'quietEndHour', 'quietEndMinute',
+                         'tempAlertThreshold', 'easAutoPlay', 'easToneType',
+                         'autoPushEnabled', 'darkModePref', 'broadcastLang', 'selectedDistrict',
+                         'emergencySmsNumber', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidUserPreferences(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidUserPreferences(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'displayName', 'quietHoursEnabled',
+                         'quietStartHour', 'quietStartMinute', 'quietEndHour', 'quietEndMinute',
+                         'tempAlertThreshold', 'easAutoPlay', 'easToneType',
+                         'autoPushEnabled', 'darkModePref', 'broadcastLang', 'selectedDistrict',
+                         'emergencySmsNumber', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId);
+
+      match /weather_history/{recordId} {
+        allow get, list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(recordId) &&
+                         incoming().keys().hasAll([
+                           'userId', 'stationName', 'district', 'recordDate',
+                           'tempCelsius', 'maxTempCelsius', 'minTempCelsius',
+                           'humidityPercent', 'rainfallMm', 'uvIndex', 'aqhiLevel',
+                           'activeWarnings', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'stationName', 'district', 'recordDate',
+                           'tempCelsius', 'maxTempCelsius', 'minTempCelsius',
+                           'humidityPercent', 'rainfallMm', 'uvIndex', 'aqhiLevel',
+                           'activeWarnings', 'summaryNote', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidWeatherHistoryRecord(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(recordId) &&
+                         isValidWeatherHistoryRecord(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'stationName', 'district', 'recordDate',
+                           'tempCelsius', 'maxTempCelsius', 'minTempCelsius',
+                           'humidityPercent', 'rainfallMm', 'uvIndex', 'aqhiLevel',
+                           'activeWarnings', 'summaryNote', 'updatedAt'
+                         ]);
+
+        allow delete: if isOwner(userId) && isValidId(recordId);
+      }
+    }
+
+    match /community_reports/{reportId} {
+      allow get: if isSignedIn() && isValidId(reportId) && existing().visibility == 'PUBLIC';
+      allow list: if isSignedIn() && existing().visibility == 'PUBLIC';
+
+      allow create: if isSignedIn() &&
+                       isValidId(reportId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'authorAlias', 'district', 'hazardType',
+                         'severity', 'waterDepthCm', 'description',
+                         'latitude', 'longitude', 'visibility', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'authorAlias', 'district', 'hazardType',
+                         'severity', 'waterDepthCm', 'description',
+                         'latitude', 'longitude', 'visibility', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidCommunityReport(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(reportId) &&
+                       existing().userId == request.auth.uid &&
+                       isValidCommunityReport(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'authorAlias', 'district', 'hazardType',
+                         'severity', 'waterDepthCm', 'description',
+                         'latitude', 'longitude', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(reportId) && existing().userId == request.auth.uid;
+    }
+  }
+}

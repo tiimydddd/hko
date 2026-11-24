@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/plus_jakarta_sans.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/space_grotesk.ttf") format("truetype");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains_mono.ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  --stca-bg: #F3F7FB;
+  --stca-on-bg: #0A192F;
+  --stca-surface: #FFFFFF;
+  --stca-on-surface: #0A192F;
+  --stca-surface-variant: #E4EEF8;
+  --stca-on-surface-variant: #475569;
+  --stca-primary: #0369A1;
+  --stca-on-primary: #FFFFFF;
+  --stca-primary-container: #E0F2FE;
+  --stca-on-primary-container: #082F49;
+  --stca-secondary: #0891B2;
+  --stca-secondary-container: #CFFAFE;
+  --stca-on-secondary-container: #164E63;
+  --stca-tertiary: #D97706;
+  --stca-tertiary-container: #FEF3C7;
+  --stca-on-tertiary-container: #78350F;
+  --stca-error: #DC2626;
+  --stca-error-container: #FEE2E2;
+  --stca-on-error-container: #7F1D1D;
+  --stca-outline: #CBD5E1;
+  --stca-card-radius: 20px;
+  --stca-hero-radius: 26px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", "PingFang HK", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+  background-color: var(--stca-bg);
+  color: var(--stca-on-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono-telemetry {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.font-display-grotesk {
+  font-family: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
